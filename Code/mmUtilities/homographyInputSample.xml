@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<HomographyInput>
+	<Point>
+		<Pixel x="5" y="5" />
+		<Metric x="25" y="25" /> 
+	</Point>
+	<Point>
+		<Pixel x="25" y="35" />
+		<Metric x="215" y="225" /> 
+	</Point>
+	<Point>
+		<Pixel x="51" y="5" />
+		<Metric x="215" y="25" /> 
+	</Point>
+	<Point>
+		<Pixel x="15" y="54" />
+		<Metric x="225" y="245" /> 
+	</Point>
+</HomographyInput>
