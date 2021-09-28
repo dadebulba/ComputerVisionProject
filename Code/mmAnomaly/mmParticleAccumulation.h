@@ -4,67 +4,71 @@
 using namespace cv;
 using namespace std;
 
-namespace mmLib{
-namespace mmAnomaly{
-struct mmParticleAccumulationSettings{
-	mmParticleAccumulationSettings();
-	vector<vector<Point> > surveilanceAreaParam;
-//	double sigmaParam;
-//	double threshParam;
-	int minMovementParam;
-	int gridGranularityParam;
-	int trackPeriodParam;
-};
+namespace mmLib
+{
+	namespace mmAnomaly
+	{
+		struct mmParticleAccumulationSettings
+		{
+			mmParticleAccumulationSettings();
+			vector<vector<Point>> surveilanceAreaParam;
+			//	double sigmaParam;
+			//	double threshParam;
+			int minMovementParam;
+			int gridGranularityParam;
+			int trackPeriodParam;
+		};
 
-class mmParticleAccumulation{
-public:
-	mmParticleAccumulation();
-	mmParticleAccumulation(mmLib::mmAnomaly::mmParticleAccumulationSettings &paS);
-	~mmParticleAccumulation();
+		class mmParticleAccumulation
+		{
+		public:
+			mmParticleAccumulation();
+			mmParticleAccumulation(mmLib::mmAnomaly::mmParticleAccumulationSettings &paS);
+			~mmParticleAccumulation();
 
-	void setUpModule(Mat frame);
-	void computeParticleAdvection(Mat frame);
-	void clearVariables();
+			void setUpModule(Mat frame);
+			void computeParticleAdvection(Mat frame);
+			void clearVariables();
 
-	vector<Point2f> getFinalParticle();
-	vector<Point2f> getFirstFrameParticle();
-	vector<float> getPathLenght();
-	vector<float> getPathLenghtX();
-	vector<float> getPathLenghtY();
+			vector<Point2f> getFinalParticle();
+			vector<Point2f> getFirstFrameParticle();
+			vector<float> getPathLenght();
+			vector<float> getPathLenghtX();
+			vector<float> getPathLenghtY();
 
-	Mat getParticleAdvection();
-	Mat getFinalParticleMat();
-private:
-	void selectParticle(Mat frame);
+			Mat getParticleAdvection();
+			Mat getFinalParticleMat();
 
-	vector<Point2f> actualPos;
-	vector<Point2f> finalParticle;
-	vector<Point2f> startParticle;
-	vector<float> pathLenght;
-	vector<float> pathLenghtFin;
-	vector<float> pathLenghtX;
-	vector<float> pathLenghtXFin;
-	vector<float> pathLenghtY;
-	vector<float> pathLenghtYFin;
-	vector<Point2f> firstFrameParticle;
-	vector<vector<Point> > surveilanceArea;
-	Mat prevFrame;
-	Mat particleAdvection;
-	Mat finalParticleMat;
+		private:
+			void selectParticle(Mat frame);
 
-//	double sigma;
-//	double thresh;
-	bool firstFrame;
-	int minMovement;
-	int gridGranularity;
-	int trackPeriod;
-	int countFrame;
-	int totalFrameProcessed;
-};
-}
+			vector<Point2f> actualPos;
+			vector<Point2f> finalParticle;
+			vector<Point2f> startParticle;
+			vector<float> pathLenght;
+			vector<float> pathLenghtFin;
+			vector<float> pathLenghtX;
+			vector<float> pathLenghtXFin;
+			vector<float> pathLenghtY;
+			vector<float> pathLenghtYFin;
+			vector<Point2f> firstFrameParticle;
+			vector<vector<Point>> surveilanceArea;
+			Mat prevFrame;
+			Mat particleAdvection;
+			Mat finalParticleMat;
+
+			//	double sigma;
+			//	double thresh;
+			bool firstFrame;
+			int minMovement;
+			int gridGranularity;
+			int trackPeriod;
+			int countFrame;
+			int totalFrameProcessed;
+		};
+	}
 }
 #endif // MMPARTICLEACCUMULATIONOLD_H
-
 
 /*
 #ifndef MMPARTICLEACCUMULATION_H
