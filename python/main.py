@@ -1,2 +1,5 @@
+from mmAnomaly import mmParticleAccumulation
+
 if __name__ == "__main__":
-    print("hello world")
+    anomaly = mmParticleAccumulation.mmParticleAccumulation()
+    anomaly.releaseAll()
