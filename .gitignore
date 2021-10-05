@@ -1,1 +1,6 @@
 .vscode/
+CPP/.settings/
+CPP/Debug/
+CPP/.cproject
+CPP/.project
+CPP/mmAnomaly/.svn/
