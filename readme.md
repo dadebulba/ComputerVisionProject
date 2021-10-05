@@ -1,9 +1,18 @@
 # Anomaly Detection modules
 
 ## Module 2
-- Get the next image flow using Lucas-Kanade optical flow pyramid method
-- Get foreground points and outline them as anomalies using MixtureOfGaussian method 
-- If number anomalies are over the specified threshold then the rectangle becomes red
+### Initialization
+Params to tune:
+- threshParam: number of abnormal particle to consider the frame as abnormal
+- numAnomalyParam: number of abnormal consecutive frames to raise the alarm
+- numNormalParam: number of normal consecutive frames to raise down the alarm
+
+### How it works
+1. An initial grid of points (one every 8 pixels) is considered on the image and used as starting point.
+2. Using the Lucas-Kanade method, given the previous points to track, we identify the optical flow vectors of those points between 2 frames.
+3. Every 3 frames, the displacement between the first and third frame points is computed iff the flow was identified in the previous step for those specific points
+4. Using the Mixture of Gaussian method (where the number of Gaussian is fixed to 3), the background and foreground are separated for the selected point of the previous step, the remaining point that were excluded are automatically associated to the background. The foreground points are then drawn to the image as red dots.
+5. If the selected foreground points are more than the defined 'threshParam' for 'numAnomalyParam' consecutive frames, the anomaly is detected and will remain active for 'numNormalParam' number of frames
 
 ## Module 3
 - Define the regions of interest inside the scene (implemented as rectangles)
