@@ -23,7 +23,7 @@ bool hasEnding (string const &fullString, string const &ending) {
 int module3(module3Config &config, bool verbose){
 	string nameVideoFile = config.videoPath;
 	string nameVideoToSave = config.outputVideoPath;
-
+	
 	//capture a video
 	VideoCapture cap;
 	cap.open(nameVideoFile);

@@ -1,4 +1,180 @@
-//TODO: MODULO 1 - NOT USED!
+#include <fstream>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <boost/algorithm/string.hpp>
+#include "opencv/cxcore.h"
+#include "./modules/module3.h"
+#include "./modules/module2.h"
+
+#define MOD3_CONFIG_ROW_LEN 8
+#define MOD2_CONFIG_ROW_LEN 4
+#define VERBOSE true
+
+using namespace std;
+using namespace cv;
+
+void stringSplit(string s, string delim, vector<string> &out){
+	size_t pos_start = 0, pos_end, delim_len = delim.length();
+	string token;
+
+	while ((pos_end = s.find (delim, pos_start)) != string::npos) {
+		token = s.substr (pos_start, pos_end - pos_start);
+		pos_start = pos_end + delim_len;
+		out.push_back (token);
+	}
+
+	out.push_back (s.substr (pos_start));
+}
+
+void extractRectangles(string s, vector<Rect> &out){
+	vector<string> elem;
+	vector<int> rect;
+
+	boost::split(elem, s, [](char c){return c==' ' || c=='[' || c=='(' || c==')' || c==']' || c==';';});
+	for (int i=0; i<elem.size(); i++){
+		if (elem[i] != ""){
+			rect.push_back(stoi(elem[i]));
+
+			if (rect.size() == 4){
+				out.push_back(Rect(rect[0], rect[1], rect[2], rect[3]));
+				rect.clear();
+			}
+		}
+	}
+}
+
+string computeOutputVideoPath(string inputPath){
+	vector<string> outputVideoPathSplit;
+	string out = "";
+	bool prefixDone = false;
+
+	stringSplit(inputPath, ".", outputVideoPathSplit);
+	for (int i=0; i<outputVideoPathSplit.size(); i++) {
+		if (outputVideoPathSplit[i] != ""){
+			if (!prefixDone){
+				prefixDone = true;
+				out = out + outputVideoPathSplit[i] + "_OUTPUT.";
+			}
+			else {
+				out = out + outputVideoPathSplit[i];
+				break;
+			}
+		}
+		else
+			out = out + ".";
+	}
+
+	return out;
+}
+
+int executeModule3() {
+		// Open config file
+	ifstream config("../config/module3.csv");
+	string line;
+
+	// Read headers
+	getline(config, line);
+
+	while (getline(config, line)){
+		vector<string> split;
+		stringSplit(line, ",", split);
+
+		if (split.size() != MOD3_CONFIG_ROW_LEN){
+			cerr<<"Invalid config file - "<<split.size()<<" arguments instead of "<<MOD3_CONFIG_ROW_LEN<<endl;
+			return 1;
+		}
+
+		// Parsing values
+		module3Config configObj;
+		vector<Rect> rectangles;
+
+		configObj.videoPath = split[0];
+		configObj.outputVideoPath = computeOutputVideoPath(split[0]);
+		configObj.widthScale = stoi(split[1]);
+		configObj.heightScale = stoi(split[2]);
+		configObj.accumulationPhase_frameStart = stoi(split[3]);
+		configObj.accumulationPhase_frameEnd = stoi(split[4]);
+		configObj.thresholdHigh = stoi(split[5]);
+		configObj.thresholdLow = stoi(split[6]);
+
+		extractRectangles(split[7], rectangles);
+		configObj.rectangles = rectangles;
+
+		if (VERBOSE){
+			cout<<"Parsing "<<configObj.videoPath<<" with parameters:\n\t- Output file: "<<configObj.outputVideoPath<<"\n\t- Width scale: "<<configObj.widthScale<<"\n\t- Height scale: "<<configObj.heightScale<<endl;
+			cout<<"\t- ACC frame start: "<<configObj.accumulationPhase_frameStart<<"\n\t- ACC frame end: "<<configObj.accumulationPhase_frameEnd<<endl;
+			cout<<"\t- Threshold high: "<<configObj.thresholdHigh<<"\n\t- Threshold low: "<<configObj.thresholdLow<<"\n\t- Rectangles: "<<split[7]<<endl<<endl;
+		}
+
+		//Parse the video
+		module3(configObj, VERBOSE);
+
+	}
+	return 0;
+}
+
+int executeModule2() {
+		// Open config file
+	ifstream config("../config/module2.csv");
+	string line;
+
+	// Read headers
+	getline(config, line);
+
+	while (getline(config, line)){
+		vector<string> split;
+		stringSplit(line, ",", split);
+
+		if (split.size() != MOD2_CONFIG_ROW_LEN){
+			cerr<<"Invalid config file - "<<split.size()<<" arguments instead of "<<MOD2_CONFIG_ROW_LEN<<endl;
+			return 1;
+		}
+
+		// Parsing values
+		module2Config configObj;
+		vector<Rect> rectangles;
+		configObj.videoPath = split[0];
+		configObj.threshold = stoi(split[1]);
+		configObj.numAnomalyParam = stoi(split[2]);
+		configObj.numNormalParam = stoi(split[3]);
+		
+		if (VERBOSE){
+			cout<<"Parsing "<<configObj.videoPath
+			<<" with parameters:\n\t- Threshold: "<<configObj.threshold
+			<<"\n\t- Num consequent anomaly frame: "<<configObj.numAnomalyParam
+			<<"\n\t- Num consequent normal frame: "<<configObj.numNormalParam<<endl;
+		}
+
+		//Parse the video
+		module2(configObj, VERBOSE);
+
+	}
+	return 0;
+}
+
+int main(){
+	//return executeModule3();
+	return executeModule2();
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//TODO: MODULO 1
 /*
 #include "stdlib.h"
 #include "stdio.h"
@@ -181,29 +357,27 @@ int main(){
 */
 
 //TODO:MODULO 2
-
-#include <stdio.h>
+/*#include <stdio.h>
 #include <opencv/cv.h>
 #include <opencv/cvaux.h>
 #include <opencv/cxcore.h>
 #include <opencv/highgui.h>
 #include <stdio.h>
 #include <math.h>
-#include "mmLib.h"
+#include "mmLib/mmLib.h"
 
 using namespace cv;
 using namespace std;
 
 int main(){
     Mat prevGray, frame, gray, backgImage, VelocityImage;
-	cv::VideoCapture capture("../video/pedoni.avi");
+	cv::VideoCapture capture("../VIDEO/Anomaly1.avi");
 
 	int isColor = 1;
-	int fps     = capture.get(CV_CAP_PROP_FPS);
-	int frameW  = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-	int frameH  = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-
-	//VideoWriter video( "UMN.avi", CV_FOURCC('D', 'I', 'V', 'X'), fps, cvSize(frameW, frameH), isColor );
+	int fps     = 25;
+	int frameW  = 640;
+	int frameH  = 480;
+	VideoWriter video( "UMN.avi", CV_FOURCC('D', 'I', 'V', 'X'), fps, cvSize(frameW, frameH), isColor );
 
     if (!capture.isOpened())
         return 0;
@@ -226,11 +400,12 @@ int main(){
     Point2f Singlept;
     //initialize variable
     mmLib::mmAnomaly::mmGaussianModelSettings gmSets;
-    gmSets.heightParam = capture.get(CV_CAP_PROP_FRAME_HEIGHT);;
-    gmSets.widthParam = capture.get(CV_CAP_PROP_FRAME_WIDTH);;
-    gmSets.threshParam = 3; //number of abnormal particle to consider the frame as abnormal
-    gmSets.numAnomalyParam = 1; //number of abnormal consecutive frames to raise the alarm
-    gmSets.numNormalParam = 3; //number of normal consecutive frames to raise down the alarm
+    gmSets.heightParam = 25;
+    gmSets.widthParam = 35;
+    gmSets.threshParam = 6;
+    gmSets.numAnomalyParam = 3;
+    gmSets.numNormalParam = 1;
+
 	FILE* pFile = fopen("UMN.txt", "w");
 	fprintf(pFile, "UMN\n");
 	fprintf(pFile,"thresh=%d\n",gmSets.threshParam);
@@ -238,12 +413,11 @@ int main(){
 	fprintf(pFile,"num Normal=%d\n",gmSets.numNormalParam);
 	fprintf(pFile,"win size::h=%d, w=%d\n",gmSets.heightParam,gmSets.widthParam);
 	fprintf(pFile,"\n");
-
+	fclose(pFile);
 
 	//create object
     mmLib::mmAnomaly::mmGaussianModel* GM = new mmLib::mmAnomaly::mmGaussianModel(gmSets);
 
-    //create the 3 windows
 	backgImage = Mat(rows,cols,CV_8UC3,CV_RGB(0,0,0));
 	VelocityImage = Mat(rows,cols,CV_8UC1,cv::Scalar(0));
 	namedWindow("GMM result", 1);
@@ -253,25 +427,11 @@ int main(){
 	namedWindow("velocityImage", 1);
 	cvMoveWindow("velocityImage",660,0);
 
-	/* AGGIUNTA: Create some random colors
-	vector<Scalar> colors;
-	RNG rng;
-	for(int i = 0; i < 100; i++)
-	{
-		int r = rng.uniform(0, 256);
-		int g = rng.uniform(0, 256);
-		int b = rng.uniform(0, 256);
-		colors.push_back(Scalar(r,g,b));
-	}
-
-	Mat mask = Mat::zeros(frame.size(), frame.type());
-	//Fine Aggiunta*/
-
     while (true){
 		++nFrameCount;
-		if (!capture.read(frame)){
+		if (!capture.read(frame))
 			break;
-		}
+
 		cvtColor(frame,gray,CV_RGB2GRAY);
 
 		if(stopInit == true){
@@ -279,7 +439,7 @@ int main(){
 			stopInit = false;
 		}
 
-		//1. Init particles grid (done every 4 frame)
+		//initialize module
 		if( needToInit ){
 			points[1].clear();
             for(int r=0; r < rows; r=r+8)
@@ -289,52 +449,18 @@ int main(){
                 points[1].push_back(Singlept);
 			}
 			needToInit = false;
-
 		}
+
 		//proces frames
 		else if(!points[0].empty()){
+//			cout << "FRAME: " << nFrameCount << endl;
 			vector<uchar> status;
 			vector<float> err;
-			//cout<<"InputArray: "<<prevGray<<endl<<"NextImage: "<<gray<<endl<<"PrevPoints: "<<points[0]<<endl<<"NextPoints: "<<points[1]<<endl;
-			/*
-			 * prevImg	first 8-bit input image or pyramid constructed by buildOpticalFlowPyramid.
-			 * nextImg	second input image or pyramid of the same size and the same type as prevImg.
-			 *	prevPts	vector of 2D points for which the flow needs to be found; point coordinates must be single-precision floating-point numbers.
-			 *	nextPts	output vector of 2D points (with single-precision floating-point coordinates) containing the calculated new positions of input features in the second image; when OPTFLOW_USE_INITIAL_FLOW flag is passed, the vector must have the same size as in the input.
-			 *	status	output status vector (of unsigned chars); each element of the vector is set to 1 if the flow for the corresponding features has been found, otherwise, it is set to 0.
-			 *	err	output vector of errors; each element of the vector is set to an error for the corresponding feature, type of the error measure can be set in flags parameter; if the flow wasn't found then the error is not defined (use the status parameter to find such cases).
-			 *	winSize	size of the search window at each pyramid level.
-			 *	maxLevel	0-based maximal pyramid level number; if set to 0, pyramids are not used (single level), if set to 1, two levels are used, and so on; if pyramids are passed to input then algorithm will use as many levels as pyramids have but no more than maxLevel.
-			 *	criteria	parameter, specifying the termination criteria of the iterative search algorithm (after the specified maximum number of iterations criteria.maxCount or when the search window moves by less than criteria.epsilon.
-			 */
 			calcOpticalFlowPyrLK(prevGray, gray, points[0], points[1], status, err, winSize, 3, termcrit, 0);
+			VelocityImage = GM->MagnitudeFunt(frame, VelocityImage, points[1], tempoints, status, nFrameInit, needToInit);
 
-			// Aggiunta
-			/*
-			vector<Point2f> good_new;
-			for(uint i = 0; i < points[0].size(); i++)
-			{
-				// Select good points
-				if(status[i] == 1) {
-					good_new.push_back(points[1][i]);
-					// draw the tracks
-					line(mask,points[1][i], points[0][i], colors[i], 2);
-					circle(frame, points[1][i], 5, colors[i], -1);
-				}
-			}
-			Mat img;
-			add(frame, mask, img);
-
-			imshow("Frame", img);
-			*///fine aggiunta
-
-			GM->MagnitudeFunt(frame, VelocityImage, points[1], tempoints, status, nFrameInit, needToInit);
-			//cout<<"NumFrameInit: "<<nFrameInit<<endl;
-			//printf("%s",status);
-			//cout<<endl<<"SearchWindowSize: "<<winSize<<endl;
-			cout<<"nFrameInit"<<nFrameInit<<"\tNeedToInit: "<<needToInit<<endl;
 			if(nFrameInit == 1 && needToInit){
-				backgImage = GM->updateBackgroundModel(frame,VelocityImage,backgImage);
+				GM->updateBackgroundModel(frame,VelocityImage,backgImage);
 				GM->findAnomaly(frame);
 
 				imshow("background", backgImage);
@@ -343,33 +469,27 @@ int main(){
 			}
 		}
 		//draw anomaly
-		if (GM->getAnomaly()){
-			cout<<"Anomaly at:"<<nFrameCount<<endl;
-			fprintf(pFile,"\nAnomaly at %d", nFrameCount);
+		if (GM->getAnomaly())
 			rectangle(frame,Point(0,0),Point(cols-1,rows-1),Scalar(0,0,255),3);
-		}
 		else
 			rectangle(frame,Point(0,0),Point(cols-1,rows-1),Scalar(0,255,0),3);
 
 		imshow("GMM result",frame);
 
-		/*
 		if (video.isOpened()){
 			video << VelocityImage;
 		}
-		*/
+
         swap(points[1], points[0]);
 		gray.copyTo(prevGray);
 		waitKey(10);
 
 		frame.release(); gray.release();
 	}
-	fclose(pFile);
     prevGray.release(); backgImage.release(); VelocityImage.release();
 
     delete GM;
-}
-
+}*/
 
 //TODO:MODULO 3
 /*
@@ -389,11 +509,11 @@ using namespace std;
 //CvVideoWriter* video;
 
 int main(){
-	string nameVideo = "Crowd1";
-	string nameVideoFile = "../video/"+nameVideo+".avi";
+	string nameVideo = "cam3";
+	string nameVideoFile = "../video/"+nameVideo+".mp4";
 	string nameVideoToSave = nameVideo+"4Vid.avi";
-	string nameVideoText = nameVideo+".txt";
-	string nameVideoImg = nameVideo+".png";
+	//string nameVideoText = nameVideo+".txt";
+	//string nameVideoImg = nameVideo+".png";
 
 	//capture a video
 	VideoCapture cap;
@@ -411,12 +531,14 @@ int main(){
 	int dimY = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
 	int fps     = cap.get(CV_CAP_PROP_FPS);
 	int totalFrames = cap.get(CV_CAP_PROP_FRAME_COUNT);
-	cout<<"Dimensions: "<<dimX<<"x"<<dimY<<"- FPS:"<<fps<<" - Duration in frames: "<<totalFrames<<endl;
+	cout<<dimX<<"-"<<dimY<<"-"<<fps<<"-"<<totalFrames<<endl;
+
 	int frameW  = dimX;
 	int frameH  = dimY;
-	VideoWriter video(nameVideoToSave, CV_FOURCC('D', 'I', 'V', 'X'), fps, cvSize(frameW, frameH), true);
+	VideoWriter video(nameVideoToSave, CV_FOURCC('D', 'I', 'V', 'X'), fps, cvSize(frameW/4, frameH/4), true);
 
 	//surveillance area vertex
+
 	vector<vector<Point> > contours;
 	vector<Point> stuff;
 	stuff.push_back(Point(70,185));
@@ -429,37 +551,40 @@ int main(){
 	stuff.push_back(Point(70,185));
 	contours.push_back(stuff);
 
+
 	//create objects
 	mmLib::mmAnomaly::mmParticleAccumulationSettings paSet;
-	paSet.trackPeriodParam = 49;
-	paSet.minMovementParam = 5;
-	paSet.gridGranularityParam = 8;
-
+	paSet.trackPeriodParam = 1;
+	paSet.minMovementParam = 1;
+	paSet.gridGranularityParam = 6;
 	mmLib::mmAnomaly::mmParticleAccumulation* pAccumul = new mmLib::mmAnomaly::mmParticleAccumulation(paSet);
 
 	mmLib::mmAnomaly::mmParticleEnergySettings peSet;
 	vector<Rect> rectVect;
-	rectVect.push_back(Rect(40,40,240,160));
+	rectVect.push_back(Rect(40,35,150,150));
 	//rectVect.push_back(Rect(70,185,120,75));
 	//rectVect.push_back(Rect(190,185,120,75));
 	//rectVect.push_back(Rect(190,110,120,75));
 	peSet.surveilanceRectParam = rectVect;
-	peSet.sigmaParam = 0.05;
+	peSet.sigmaParam = 0.1;
 	peSet.filterSizeParam = Size(31,31);
 	peSet.profileFrameStartParam = 0;
-	peSet.profileLengthParam = totalFrames; //1000
-	peSet.profilePeriodParam = totalFrames; //1000
-	peSet.valuePeriodParam = totalFrames; //1000
+	peSet.profileLengthParam = 120;
+	peSet.profilePeriodParam = 120;
+	peSet.valuePeriodParam = 2;
 	peSet.trackingPeriodParam = paSet.trackPeriodParam+1;
-
+	peSet.threshHighParam = 20;
+	peSet.threshLowParam = 20;
 	mmLib::mmAnomaly::mmParticleEnergy* pEnergy = new mmLib::mmAnomaly::mmParticleEnergy(peSet);
-	cout<<"Open file Uni"<<endl;
+
 	FILE* pFile = fopen("Uni.txt", "w");
 	fprintf(pFile,"UNI\n");
+
 	fprintf(pFile,"Surveilance Area: ");
 	for (int i=0;i<stuff.size(); i++){
 		fprintf(pFile,"(%d,%d), ",stuff[i].x,stuff[i].y);
 	}
+
 	fprintf(pFile,"\n");
 	fprintf(pFile,"TrackPeriod=%d\n",paSet.trackPeriodParam);
 	fprintf(pFile,"MinMovement=%d\n",paSet.minMovementParam);
@@ -488,19 +613,15 @@ int main(){
 	double maxRef, maxIt;
 	vector<Point2f> vect;
 	vector<mmLib::mmAnomaly::ANOMALY_TYPE> anomalyVect;
-	cout<<"Initializing while"<<endl;
-	getchar();
-	while(true){
-	//for(int i=0; i<totalFrames;i++){
-		cap >> immagine;
 
+	while(true){
+		//cout<<countFrame<<endl;
+		cap >> immagine;
 		if(immagine.empty()){
 			break;
 		}
 
-		//cout<<immagine<<endl<<frame<<endl;
-		resize(immagine,frame,Size(320,240),scaleX,scaleY);
-		//cout<<"Crasha?"<<endl;
+		resize(immagine,frame,Size(dimX/4,dimY/4),scaleX,scaleY);
 
 
 		immagine.release();
@@ -520,11 +641,11 @@ int main(){
 		pAccumul->computeParticleAdvection(frame);
 		//get final particle
 		vect = pAccumul->getFinalParticle();
-		//cout<<"count frame:"<<countFrame<<endl;
+
 		if(pEnergy->getRec()){
 			//record phase
 			if(oneV){
-//				cout << "REC PHASE" << endl;
+				cout << "REC PHASE" << endl;
 				oneV = false;
 			}
 			if ((countFrame+1)%(paSet.trackPeriodParam+1)==0 && countFrame > peSet.profileFrameStartParam){
@@ -562,8 +683,9 @@ int main(){
 			if(countFrame>(peSet.profileLengthParam+peSet.profileFrameStartParam) || !pEnergy->getRec()){
 				cout << "STOP REC-->FRAME=  " <<  countFrame << endl;
 				pEnergy->clearVariables();
+				//pEnergy->setRec(false);
 				pAccumul->clearVariables();
-				pAccumul = new mmLib::mmAnomaly::mmParticleAccumulation(paSet);
+//				pAccumul = new mmLib::mmAnomaly::mmParticleAccumulation(paSet);
 				cap.open(nameVideoFile);
 				countFrame = -1;
 				countIt = 0;
@@ -587,7 +709,6 @@ int main(){
 						fprintf(pFile,"-->(%d):: %f ",l,energyValue[l]);
 					}
 					fprintf(pFile,"\n");
-
 					anomalyVect = pEnergy->getAnomalyType();
 					if (anomalyVect[0] == mmLib::mmAnomaly::STANDARD)
 						fprintf(pFile,"0::STD ");
@@ -611,7 +732,6 @@ int main(){
 						fprintf(pFile,"2::HIGHANOMALY ");
 					else if (anomalyVect[2] == mmLib::mmAnomaly::LOWANOMALY)
 						fprintf(pFile,"2::LOWANOMALY ");
-
 					fprintf(pFile,"\n");
 					fclose(pFile);
 					energyValue.clear();
@@ -624,24 +744,29 @@ int main(){
 			}
 			//draw anomaly
 			if (anomalyVect.size() == 0){
-				rectangle(iAnomaly,rectVect[0],Scalar(0,255,0),2);
-				rectangle(iAnomaly,rectVect[1],Scalar(0,255,0),2);
-				rectangle(iAnomaly,rectVect[2],Scalar(0,255,0),2);
+				//cout<<"Entro size 0"<<endl;
+				rectangle(iAnomaly,rectVect[0],Scalar(125,125,125),2);
+				//rectangle(iAnomaly,rectVect[1],Scalar(0,255,0),2);
+				//rectangle(iAnomaly,rectVect[2],Scalar(0,255,0),2);
 			}
 			else{
+				//cout<<"Entro FOR "<<rectVect.size()<<endl;
 				for (int l=0; l<rectVect.size();l++){
+					//cout<<anomalyVect[l]<<"-"<<endl;
 					if (anomalyVect[l] == mmLib::mmAnomaly::STANDARD)
 						rectangle(iAnomaly,rectVect[l],Scalar(0,255,0),2);
 					else if (anomalyVect[l] == mmLib::mmAnomaly::HIGHANOMALY)
 						rectangle(iAnomaly,rectVect[l],Scalar(0,0,255),2);
-					else
-						rectangle(iAnomaly,rectVect[l],Scalar(0,125,255),2);
+					else if (anomalyVect[l] == mmLib::mmAnomaly::LOWANOMALY)
+						rectangle(iAnomaly,rectVect[l],Scalar(255,0,0),2);
 				}
+				//cout<<endl<<endl;
 			}
 		}
 
 
 		imshow("Video",frame);
+		imshow("Anomaly", iAnomaly);
 		waitKey(10);
 
 		if (video.isOpened() && (!pEnergy->getRec() || (pEnergy->getRec() && countFrame > peSet.profileFrameStartParam && countFrame < (peSet.profileFrameStartParam+peSet.profileLengthParam)))){
@@ -651,13 +776,14 @@ int main(){
 		countFrame++;
 		frame.release(); iAnomaly.release();
 	}
-	cout<<"Exiting while"<<endl;
+
 	reference.release(); iteration.release();	energyProfile.clear(); energyValue.clear(); vect.clear(); anomalyVect.clear(); rectVect.clear();
-	contours.clear(); stuff.clear();
+	// contours.clear(); stuff.clear();
 	delete pAccumul;
 	delete pEnergy;
 }
 */
+
 //TODO: MODULO 4
 /*//train file generation
 #include "stdlib.h"
