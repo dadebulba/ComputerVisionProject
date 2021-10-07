@@ -1,0 +1,5 @@
+videoPath,widthScale,heightScale,ACC_frameStart,ACC_frameEnd,threshHigh,threshLow,rectangles
+../video/police2.avi,4,4,0,120,20,20,[(40;35;150;150);(290;150;50;50)]
+../video/cam1.mp4,3,3,0,120,5,5,[(150;180;100;50);(400;100;70;70)]
+../video/venice.mp4,3,3,0,120,5,5,[(40;40;500;500)]
+../video/venice.mp4,3,3,0,120,5,5,[(150;180;150;150);(420;120;70;70)]
