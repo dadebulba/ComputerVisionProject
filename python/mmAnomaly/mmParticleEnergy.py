@@ -1,6 +1,6 @@
 import math
 
-class ParticleEnergySettings:
+class mmParticleEnergySettings:
     def __init__(self):
         self.surveilanceRectDimParam = (40, 40)
         self.filterSizeParam = (31, 31)
@@ -14,7 +14,7 @@ class ParticleEnergySettings:
         self.profileLengthParam = 1000
         self.trackingPeriodParam = 50
 
-class ParticleEnergy:
+class mmParticleEnergy:
     # FIXME: profileEnVectParam and surveilanceRectParam
     def __init__(self, peSet = None):
         self.surveilanceRectDim = peSet.surveilanceRectDimParam if hasattr(peSet,'surveilanceRectDimParam') else (40, 40)
