@@ -174,14 +174,20 @@ vector<mmLib::mmAnomaly::ANOMALY_TYPE> mmParticleEnergy::getAnomalyType(){
 
 	for (int i=0; i<valueEnVect.size(); i++){
 		if(profileEnVect.size() == 1){
-			if (valueEnVect[i]-profileEnVect[0][i]>threshHigh )
+			//cout<<"1 --> "<<valueEnVect[i]-profileEnVect[0][i]<<endl;
+			if (valueEnVect[i]-profileEnVect[0][i]>threshHigh ){
 				anomalyVect.push_back(HIGHANOMALY);
-			else if (valueEnVect[i]-profileEnVect[0][i]<-threshLow)
+				//cout<<"HIGH"<<endl<<endl;
+			}
+			else if (valueEnVect[i]-profileEnVect[0][i]<-threshLow){
+				//cout<<"LOW"<<endl<<endl;
 				anomalyVect.push_back(LOWANOMALY);
+			}
 			else
 				anomalyVect.push_back(STANDARD);
 		}
 		else{
+			//cout<<"2 --> "<<valueEnVect[i]-profileEnVect[profileEnIndex][i]<<endl;
 			if (valueEnVect[i]-profileEnVect[profileEnIndex][i]>threshHigh)
 				anomalyVect.push_back(HIGHANOMALY);
 			else if (valueEnVect[i]-profileEnVect[profileEnIndex][i]<-threshLow)
@@ -258,6 +264,10 @@ Mat mmParticleEnergy::getMatValue(){
 
 bool mmParticleEnergy::getRec(){
 	return needToRec;
+}
+
+void mmParticleEnergy::setRec(bool value){
+	needToRec = value;
 }
 }
 }
