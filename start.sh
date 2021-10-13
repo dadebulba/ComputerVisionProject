@@ -19,7 +19,7 @@ function install {
     actual_dir=$(pwd)
 
     echo "--- Install dependecies for build ---"
-    sudo apt install build-essential cmake git pkg-config libgtk-3-dev \
+    apt install build-essential g++ cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
     gfortran openexr libatlas-base-dev python3-dev python3-numpy \
@@ -48,7 +48,7 @@ function install {
     make -j$(nproc) >/dev/null 2>&1
 
     echo "--- Installing OpenCV 2.4 ---"
-    sudo make install >/dev/null 2>&1
+    make install >/dev/null 2>&1
 
     echo "--- OpenCV installation completed - Version $(pkg-config --modversion opencv) ---"
     rm -rf ~/opencv_build
@@ -73,6 +73,12 @@ function build {
     rm -rf $BUILD_DIR
     rm ./main.d ./module2.d ./module3.d ./mmGaussianModel.d ./mmParticleAccumulation.d ./mmParticleEnergy.d
 }
+
+# Check if the script is running with root privileges
+if [[ $(whoami) != "root" ]]; then
+    echo "ERROR: run start.sh with root privileges"
+    exit 1
+fi
 
 # Parse the inline parameters
 while [[ $# -gt 0 ]]; do
