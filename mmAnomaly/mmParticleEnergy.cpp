@@ -265,9 +265,5 @@ Mat mmParticleEnergy::getMatValue(){
 bool mmParticleEnergy::getRec(){
 	return needToRec;
 }
-
-void mmParticleEnergy::setRec(bool value){
-	needToRec = value;
-}
 }
 }
