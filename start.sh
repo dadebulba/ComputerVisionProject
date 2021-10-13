@@ -28,7 +28,7 @@ function install {
 
     # Download the OpenCV library for C++ version 2.4 as required
     echo "--- Downloading OpenCV 2.4 C++ library ---"
-    mkdir ~/opencv_build2 && cd ~/opencv_build2
+    mkdir ~/opencv_build && cd ~/opencv_build
     git clone https://github.com/opencv/opencv.git >/dev/null 2>&1
     cd opencv
     git checkout 2.4 >/dev/null 2>&1
@@ -51,6 +51,7 @@ function install {
     sudo make install >/dev/null 2>&1
 
     echo "--- OpenCV installation completed - Version $(pkg-config --modversion opencv) ---"
+    rm -rf ~/opencv_build
     cd $actual_dir
 }
 
