@@ -1,5 +1,0 @@
-visualizzare Lucas-Kanade optical flow per capire da dove vengono i puntini
-normalizzare con gaussiana?
-
-SIMULATORE
-Vedere branch recording
