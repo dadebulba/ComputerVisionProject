@@ -1,2 +1,2 @@
 videoPath,threshold,numAnomalyParam,numNormalParam
-../video/cam6.avi,20,3,3
+./videos/avi/100_50_area1_4.avi, 100, 3, 3

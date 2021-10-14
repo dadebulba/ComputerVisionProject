@@ -208,6 +208,7 @@ Mat mmGaussianModel::updateBackgroundModel(Mat& frame, Mat velocityImage, Mat ba
 					//particle vect is an array containing foreground points
 					particleVect.push_back(Singlept);
 					circle( frame, Singlept, 2, Scalar(0,0,255), -1, 8);
+					//getchar();
 				}
 			}
 			else{
@@ -286,7 +287,6 @@ bool mmGaussianModel::checkBackground(int index){
 
 	for(i=0; i<numGaussian; i++){
 		sumWeights += gaussian[index][i].weight;
-
 		if(sumWeights > tProva){
 			backgroundIndex = i;
 			break;
@@ -332,7 +332,7 @@ void mmGaussianModel::adjustWeight(int index, int indexGauss, double learningRat
 		gaussian[index][indexGauss].weight = (1-learningRate)*gaussian[index][indexGauss].weight;
 }
 
-void mmGaussianModel::findAnomaly(Mat frame){
+int mmGaussianModel::findAnomaly(Mat frame){
 	Rect r;
 	int i = 0;
 	int count;
@@ -349,29 +349,21 @@ void mmGaussianModel::findAnomaly(Mat frame){
 		int by = (particleVect[i].y+ceil(height/2)>=0)?((particleVect[i].y+ceil(height/2)<frame.rows)?particleVect[i].y+ceil(height/2):frame.rows-1):0;
 		r = Rect(tx,ty,(bx-tx),(by-tx));
 		count = 0;
-		cout<<"Rectangle: x:"<<r.x<<" y:"<<r.y<<" width:"<<r.width<<" height: "<<height<<endl;
 
 		for (int j=0; j<particleVect.size(); j++){
-			cout<<"particleVect[i] "<<particleVect[i]<<"\tparticleVect[j] "<<particleVect[j]<<"\t particleVect"<<particleVect<<endl;
-			//getchar();
 			if (particleVect[j].x > r.x && particleVect[j].x < r.x+r.width && particleVect[j].y > r.y && particleVect[j].y < r.y+r.height)
 				count++;
 		}
 		if (count>thresh){
-			cout<<"Count: "<<count<<"\tThresh: "<<thresh<<"\tIsAnomaly:"<<isAnomaly<<endl;
 			if (isAnomaly)
 				countFrame = numNormal;
 			else
 				countFrame++;
-//
 			i = particleVect.size();
 		}
-		cout<<"NumFrame: "<<countFrame<<endl;
 
 		i++;
 	}
-
-	cout<<"CountFrame: "<<countFrame<<"\tNumAnomaly: "<<numAnomaly<<endl;
 
 	if (isAnomaly){
 		if (countFrame == 0)
@@ -387,6 +379,7 @@ void mmGaussianModel::findAnomaly(Mat frame){
 	}
 
 	frame.release(); particleVect.clear();
+	return count;
 }
 
 
@@ -396,7 +389,7 @@ void mmGaussianModel::findAnomalyInsideRect(Mat frame,Rect anomalyRect){
 	int count = 0;
 
 	if (isAnomaly)
-		countFrame = countFrame--;
+		countFrame--;
 
 	int countFirst = countFrame;
 
@@ -408,7 +401,7 @@ void mmGaussianModel::findAnomalyInsideRect(Mat frame,Rect anomalyRect){
 			if (isAnomaly)
 				countFrame = numNormal;
 			else
-				countFrame = countFrame++;
+				countFrame++;
 
 			i = particleVect.size();
 		}

@@ -6,6 +6,7 @@
 #include <opencv/highgui.h>
 #include <stdio.h>
 #include <math.h>
+#include <numeric>
 #include "../mmLib.h"
 #include <iostream>
 #include "./module2.h"
@@ -14,15 +15,13 @@ using namespace cv;
 using namespace std;
 
 int module2(module2Config &config, bool verbose) {
-    Mat prevGray, frame, gray, backgImage, VelocityImage;
+	Mat prevGray, frame, gray, backgImage, VelocityImage;
 	cv::VideoCapture capture(config.videoPath);
 
 	int isColor = 1;
 	int fps     = capture.get(CV_CAP_PROP_FPS);
 	int frameW  = capture.get(CV_CAP_PROP_FRAME_WIDTH);
 	int frameH  = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-
-	//VideoWriter video( "UMN.avi", CV_FOURCC('D', 'I', 'V', 'X'), fps, cvSize(frameW, frameH), isColor );
 
     if (!capture.isOpened())
         return 0;
@@ -44,6 +43,8 @@ int module2(module2Config &config, bool verbose) {
     vector<Point2f> tempoints;
 
     Point2f Singlept;
+
+    vector<int> particlesMoved;
     //initialize variable
     mmLib::mmAnomaly::mmGaussianModelSettings gmSets;
     gmSets.heightParam = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
@@ -51,14 +52,6 @@ int module2(module2Config &config, bool verbose) {
     gmSets.threshParam = config.threshold; //number of abnormal particle to consider the frame as abnormal
     gmSets.numAnomalyParam = config.numAnomalyParam; //number of abnormal consecutive frames to raise the alarm
     gmSets.numNormalParam = config.numNormalParam; //number of normal consecutive frames to raise down the alarm
-	FILE* pFile = fopen("UMN.txt", "w");
-	fprintf(pFile, "UMN\n");
-	fprintf(pFile,"thresh=%d\n",gmSets.threshParam);
-	fprintf(pFile,"num Anomaly=%d\n",gmSets.numAnomalyParam);
-	fprintf(pFile,"num Normal=%d\n",gmSets.numNormalParam);
-	fprintf(pFile,"win size::h=%d, w=%d\n",gmSets.heightParam,gmSets.widthParam);
-	fprintf(pFile,"\n");
-
 
 	//create object
     mmLib::mmAnomaly::mmGaussianModel* GM = new mmLib::mmAnomaly::mmGaussianModel(gmSets);
@@ -176,7 +169,7 @@ int module2(module2Config &config, bool verbose) {
 			//cout<<"nFrameInit"<<nFrameInit<<"\tNeedToInit: "<<needToInit<<endl;
 			if(nFrameInit == 1 && needToInit){
 				backgImage = GM->updateBackgroundModel(frame,VelocityImage,backgImage);
-				GM->findAnomaly(frame);
+				particlesMoved.push_back(GM->findAnomaly(frame));
 
 				//imshow("background", backgImage);
 				//imshow("velocityImage", VelocityImage);
@@ -185,8 +178,9 @@ int module2(module2Config &config, bool verbose) {
 		}
 		//draw anomaly
 		if (GM->getAnomaly()){
-			cout<<"Anomaly at:"<<nFrameCount<<endl;
-			fprintf(pFile,"\nAnomaly at %d", nFrameCount);
+			if(verbose){
+				cout<<"Anomaly at:"<<nFrameCount<<endl;
+			}
 			rectangle(frame,Point(0,0),Point(cols-1,rows-1),Scalar(0,0,255),3);
 		}
 		else
@@ -206,7 +200,16 @@ int module2(module2Config &config, bool verbose) {
 
 		frame.release(); gray.release();
 	}
-	fclose(pFile);
+    if(verbose){
+    	sort(particlesMoved.begin(), particlesMoved.end());
+		cout<<"List of max particles moved: ";
+		for(int i=10; i >0; i--){
+			cout<<particlesMoved[particlesMoved.size()-i]<<" ";
+		}
+		cout <<"\n Min particles moved = "<<*min_element(particlesMoved.begin(), particlesMoved.end());
+		cout <<"\n Max particles moved = "<<*max_element(particlesMoved.begin(), particlesMoved.end());
+		cout << "\n Mean particles moved  = "<< accumulate( particlesMoved.begin(), particlesMoved.end(), 0.0)/particlesMoved.size()<<endl<<endl;
+    }
     prevGray.release(); backgImage.release(); VelocityImage.release();
 
     delete GM;

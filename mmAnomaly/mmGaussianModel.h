@@ -46,11 +46,11 @@ public:
 	mmGaussianModel(mmLib::mmAnomaly::mmGaussianModelSettings &gmSets);
 	~mmGaussianModel();
 
-	void MagnitudeFunt(Mat img, Mat& VelocityImg, vector<Point2f> vectPoints, vector<Point2f>& , vector<uchar> status, int& numFrameInit, bool& isInit);
+	void MagnitudeFunt(Mat img, Mat& VelocityImg, vector<Point2f> vectPoints, vector<Point2f>& tempPoints, vector<uchar> status, int& numFrameInit, bool& isInit);
 	Mat updateBackgroundModel(Mat& frame, Mat velocityImage, Mat background);
 
 
-	void findAnomaly(Mat frame);
+	int findAnomaly(Mat frame);
 	void findAnomalyInsideRect(Mat frame,Rect anomalyRect);
 	bool getAnomaly();
 private:

@@ -74,7 +74,7 @@ int executeModule3(bool verbose) {
 	cout<<"Executing module 3 --- verbose = "<<verbose<<endl<<endl;
 
 	// Open config file
-	ifstream config("../config/module3.csv");
+	ifstream config("./config/module3.csv");
 	string line;
 
 	// Read headers
@@ -123,7 +123,7 @@ int executeModule2(bool verbose) {
 	cout<<"Executing module 2 --- verbose = "<<verbose<<endl<<endl;
 
 	// Open config file
-	ifstream config("../config/module2.csv");
+	ifstream config("./config/module2.csv");
 	string line;
 
 	// Read headers
