@@ -36,7 +36,6 @@ int module2(module2Config &config, bool verbose) {
     bool needToInit = false;
 	bool stopInit = true;
 
-    //TermCriteria termcrit(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03);
 	TermCriteria termcrit = TermCriteria((TermCriteria::COUNT) + (TermCriteria::EPS), 10, 0.03);
     Size winSize(10,10);
     vector<Point2f> points[2];
@@ -61,28 +60,6 @@ int module2(module2Config &config, bool verbose) {
 	VelocityImage = Mat(rows,cols,CV_8UC1,cv::Scalar(0));
 	namedWindow("GMM result", 1);
 	cvMoveWindow("GMM result",0,0);
-	/*
-	namedWindow("optical_flow", 1);
-	cvMoveWindow("optical_flow",0,300);
-	namedWindow("background", 1);
-	cvMoveWindow("background",330,0);
-	namedWindow("velocityImage", 1);
-	cvMoveWindow("velocityImage",660,0);
-	*/
-	//AGGIUNTA: Create some random colors
-	vector<Scalar> colors;
-	RNG rng;
-	for(int i = 0; i < 100; i++)
-	{
-		int r = rng.uniform(0, 256);
-		int g = rng.uniform(0, 256);
-		int b = rng.uniform(0, 256);
-		colors.push_back(Scalar(r,g,b));
-	}
-
-	Mat mask = Mat::zeros(frame.size(), frame.type());
-
-	//Fine Aggiunta
 
     while (true){
 		++nFrameCount;
@@ -90,7 +67,7 @@ int module2(module2Config &config, bool verbose) {
 			break;
 		}
 		cvtColor(frame,gray,COLOR_RGB2GRAY);
-		//GaussianBlur(frame,frame,Size(5,5),0,0, BORDER_DEFAULT);
+
 	    GaussianBlur(gray,gray,Size(5,5),0,0, BORDER_DEFAULT);
 
 		if(stopInit == true){
@@ -109,21 +86,12 @@ int module2(module2Config &config, bool verbose) {
                 points[1].push_back(Singlept);
 			}
 			needToInit = false;
-			//swap(points[1], points[0]);
-
-			/*
-			points[1].clear();
-			needToInit = false;
-			goodFeaturesToTrack(gray, points[1], 100, 0.3, 7, Mat(), 7, false, 0.04);
-
-			swap(points[1], points[0]);
-			*/
 		}
 		//proces frames
 		else if(!points[0].empty()){
 			vector<uchar> status;
 			vector<float> err;
-			//cout<<"InputArray: "<<prevGray<<endl<<"NextImage: "<<gray<<endl<<"PrevPoints: "<<points[0]<<endl<<"NextPoints: "<<points[1]<<endl;
+
 			/*
 			 * prevImg	first 8-bit input image or pyramid constructed by buildOpticalFlowPyramid.
 			 * nextImg	second input image or pyramid of the same size and the same type as prevImg.
@@ -137,36 +105,8 @@ int module2(module2Config &config, bool verbose) {
 			*/
 			calcOpticalFlowPyrLK(prevGray, gray, points[0], points[1], status, err, winSize, 3, termcrit, 0);
 
-			// Aggiunta
-			Mat newFrame;
-			frame.copyTo(newFrame);
-			vector<Point2f> good_new;
-			for(uint i = 0; i < points[0].size(); i++)
-			{
-				// Select good points
-				if(status[i] == 1) {
-					good_new.push_back(points[1][i]);
-					// draw the tracks
-					line(mask,points[0][i], points[1][i], colors[i], 2);
-					//circle(newFrame, points[1][i], 5, colors[i], -1);
-				}
-
-			}
-
-
-			//points[0] = good_new;
-
-			Mat img;
-			add(newFrame, mask, img);
-
-			//imshow("optical_flow", newFrame);
-			//fine aggiunta
-
 			GM->MagnitudeFunt(frame, VelocityImage, points[1], tempoints, status, nFrameInit, needToInit);
-			//cout<<"NumFrameInit: "<<nFrameInit<<endl;
-			//printf("%s",status);
-			//cout<<endl<<"SearchWindowSize: "<<winSize<<endl;
-			//cout<<"nFrameInit"<<nFrameInit<<"\tNeedToInit: "<<needToInit<<endl;
+
 			if(nFrameInit == 1 && needToInit){
 				backgImage = GM->updateBackgroundModel(frame,VelocityImage,backgImage);
 				particlesMoved.push_back(GM->findAnomaly(frame));
@@ -187,12 +127,6 @@ int module2(module2Config &config, bool verbose) {
 			rectangle(frame,Point(0,0),Point(cols-1,rows-1),Scalar(0,255,0),3);
 
 		imshow("GMM result",frame);
-
-		/*
-		if (video.isOpened()){
-			video << VelocityImage;
-		}
-		*/
 
 		swap(points[1], points[0]); //Moved above
 		gray.copyTo(prevGray);
