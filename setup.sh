@@ -29,7 +29,7 @@ function install {
     libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
     gfortran openexr libatlas-base-dev python3-dev python3-numpy \
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
-    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libboost-all-dev -y >/dev/null 2>&1
+    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libboost-all-dev libgtk2.0-dev -y >/dev/null 2>&1
 
     # Download the OpenCV library for C++ version 2.4 as required
     echo "--- Downloading OpenCV 2.4 C++ library ---"
