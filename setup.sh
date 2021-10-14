@@ -23,7 +23,7 @@ function install {
     apt update -y >/dev/null 2>&1
     apt upgrade -y >/dev/null 2>&1
 
-    echo "--- Install dependecies for build ---"
+    echo "--- Installing dependecies for build ---"
     apt install build-essential g++ cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
@@ -61,15 +61,16 @@ function install {
 }
 
 function build {
+    echo "--- Building the project ---"
     mkdir $BUILD_DIR
 
     # Compile each source file
-    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"main.d" -MT"./$BUILD_DIR/main.o" -o "./$BUILD_DIR/main.o" "./main.cpp"
-    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"module2.d" -MT"./$BUILD_DIR/module2.o" -o "./$BUILD_DIR/module2.o" "./modules/module2.cpp"
-    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"module3.d" -MT"./$BUILD_DIR/module3.o" -o "./$BUILD_DIR/module3.o" "./modules/module3.cpp"
-    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"mmGaussianModel.d" -MT"./$BUILD_DIR/mmGaussianModel.o" -o "./$BUILD_DIR/mmGaussianModel.o" "./mmAnomaly/mmGaussianModel.cpp"
-    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"mmParticleAccumulation.d" -MT"./$BUILD_DIR/mmParticleAccumulation.o" -o "./$BUILD_DIR/mmParticleAccumulation.o" "./mmAnomaly/mmParticleAccumulation.cpp"
-    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"mmParticleEnergy.d" -MT"./$BUILD_DIR/mmParticleEnergy.o" -o "./$BUILD_DIR/mmParticleEnergy.o" "./mmAnomaly/mmParticleEnergy.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -w -c -fmessage-length=0 -MMD -MP -MF"main.d" -MT"./$BUILD_DIR/main.o" -o "./$BUILD_DIR/main.o" "./main.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -w -c -fmessage-length=0 -MMD -MP -MF"module2.d" -MT"./$BUILD_DIR/module2.o" -o "./$BUILD_DIR/module2.o" "./modules/module2.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -w -c -fmessage-length=0 -MMD -MP -MF"module3.d" -MT"./$BUILD_DIR/module3.o" -o "./$BUILD_DIR/module3.o" "./modules/module3.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -w -c -fmessage-length=0 -MMD -MP -MF"mmGaussianModel.d" -MT"./$BUILD_DIR/mmGaussianModel.o" -o "./$BUILD_DIR/mmGaussianModel.o" "./mmAnomaly/mmGaussianModel.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -w -c -fmessage-length=0 -MMD -MP -MF"mmParticleAccumulation.d" -MT"./$BUILD_DIR/mmParticleAccumulation.o" -o "./$BUILD_DIR/mmParticleAccumulation.o" "./mmAnomaly/mmParticleAccumulation.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -w -c -fmessage-length=0 -MMD -MP -MF"mmParticleEnergy.d" -MT"./$BUILD_DIR/mmParticleEnergy.o" -o "./$BUILD_DIR/mmParticleEnergy.o" "./mmAnomaly/mmParticleEnergy.cpp"
 
     # Linker
     g++ -L/usr/local/lib/ -o "mmAnomalyExecutable" ./$BUILD_DIR/module2.o ./$BUILD_DIR/module3.o  ./$BUILD_DIR/mmGaussianModel.o ./$BUILD_DIR/mmParticleAccumulation.o ./$BUILD_DIR/mmParticleEnergy.o  ./$BUILD_DIR/main.o -lopencv_calib3d -lopencv_ml -lopencv_highgui -lopencv_legacy -lopencv_video -lopencv_contrib -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_imgproc
@@ -78,6 +79,8 @@ function build {
     rm -rf $BUILD_DIR
     rm ./main.d ./module2.d ./module3.d ./mmGaussianModel.d ./mmParticleAccumulation.d ./mmParticleEnergy.d
     /sbin/ldconfig -v >/dev/null 2>&1
+
+    echo "--- Build completed ---"
 }
 
 # Check if the script is running with root privileges
