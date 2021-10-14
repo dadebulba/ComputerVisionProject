@@ -1,4 +1,4 @@
-# Anomaly Detection modules in crowded scenarios
+# Anomaly Detection in Crowded Scenarios
 
 ## Installation
 In order to install all the dependencies required to run correctly the mmAnomaly module, a bash script (setup.sh) has been developed and it is located in the principal folder. To install the dependencies, the aforementioned script has to be run with root privileges through the command “sudo ./setup.sh --install”. Note that the overall procedure may take quite a long time.
