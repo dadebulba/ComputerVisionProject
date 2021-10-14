@@ -24,7 +24,7 @@ function install {
     libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
     gfortran openexr libatlas-base-dev python3-dev python3-numpy \
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
-    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev -y >/dev/null 2>&1
+    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libboost-all-dev -y >/dev/null 2>&1
 
     # Download the OpenCV library for C++ version 2.4 as required
     echo "--- Downloading OpenCV 2.4 C++ library ---"
@@ -59,12 +59,12 @@ function build {
     mkdir $BUILD_DIR
 
     # Compile each source file
-    g++ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"main.d" -MT"./$BUILD_DIR/main.o" -o "./$BUILD_DIR/main.o" "./main.cpp"
-    g++ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"module2.d" -MT"./$BUILD_DIR/module2.o" -o "./$BUILD_DIR/module2.o" "./modules/module2.cpp"
-    g++ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"module3.d" -MT"./$BUILD_DIR/module3.o" -o "./$BUILD_DIR/module3.o" "./modules/module3.cpp"
-    g++ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"mmGaussianModel.d" -MT"./$BUILD_DIR/mmGaussianModel.o" -o "./$BUILD_DIR/mmGaussianModel.o" "./mmAnomaly/mmGaussianModel.cpp"
-    g++ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"mmParticleAccumulation.d" -MT"./$BUILD_DIR/mmParticleAccumulation.o" -o "./$BUILD_DIR/mmParticleAccumulation.o" "./mmAnomaly/mmParticleAccumulation.cpp"
-    g++ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"mmParticleEnergy.d" -MT"./$BUILD_DIR/mmParticleEnergy.o" -o "./$BUILD_DIR/mmParticleEnergy.o" "./mmAnomaly/mmParticleEnergy.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"main.d" -MT"./$BUILD_DIR/main.o" -o "./$BUILD_DIR/main.o" "./main.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"module2.d" -MT"./$BUILD_DIR/module2.o" -o "./$BUILD_DIR/module2.o" "./modules/module2.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"module3.d" -MT"./$BUILD_DIR/module3.o" -o "./$BUILD_DIR/module3.o" "./modules/module3.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"mmGaussianModel.d" -MT"./$BUILD_DIR/mmGaussianModel.o" -o "./$BUILD_DIR/mmGaussianModel.o" "./mmAnomaly/mmGaussianModel.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"mmParticleAccumulation.d" -MT"./$BUILD_DIR/mmParticleAccumulation.o" -o "./$BUILD_DIR/mmParticleAccumulation.o" "./mmAnomaly/mmParticleAccumulation.cpp"
+    g++ -I/usr/include/ -I/usr/local/include/opencv/ -O2 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"mmParticleEnergy.d" -MT"./$BUILD_DIR/mmParticleEnergy.o" -o "./$BUILD_DIR/mmParticleEnergy.o" "./mmAnomaly/mmParticleEnergy.cpp"
 
     # Linker
     g++ -L/usr/local/lib/ -o "mmAnomalyExecutable" ./$BUILD_DIR/module2.o ./$BUILD_DIR/module3.o  ./$BUILD_DIR/mmGaussianModel.o ./$BUILD_DIR/mmParticleAccumulation.o ./$BUILD_DIR/mmParticleEnergy.o  ./$BUILD_DIR/main.o -lopencv_calib3d -lopencv_ml -lopencv_highgui -lopencv_legacy -lopencv_video -lopencv_contrib -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_imgproc
