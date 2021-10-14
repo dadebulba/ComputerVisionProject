@@ -72,6 +72,7 @@ function build {
     # Clean phase
     rm -rf $BUILD_DIR
     rm ./main.d ./module2.d ./module3.d ./mmGaussianModel.d ./mmParticleAccumulation.d ./mmParticleEnergy.d
+    /sbin/ldconfig -v >/dev/null 2>&1
 }
 
 # Check if the script is running with root privileges
