@@ -1,23 +1,14 @@
-# Anomaly Detection modules
+# Anomaly Detection in Crowded Scenarios
 
-## Module 2
-### Initialization
-Params to tune:
-- threshParam: number of abnormal particle to consider the frame as abnormal
-- numAnomalyParam: number of abnormal consecutive frames to raise the alarm
-- numNormalParam: number of normal consecutive frames to raise down the alarm
+## Installation
+In order to install all the dependencies required to run correctly the mmAnomaly module, a bash script (setup.sh) has been developed and it is located in the principal folder. To install the dependencies, the aforementioned script has to be run with root privileges through the command “sudo ./setup.sh --install”. Note that the overall procedure may take quite a long time.
 
-### How it works
-1. An initial grid of points (one every 8 pixels) is considered on the image and used as starting point.
-2. Using the Lucas-Kanade method, given the previous points to track, we identify the optical flow vectors of those points between 2 frames.
-3. Every 3 frames, the displacement between the first and third frame points is computed iff the flow was identified in the previous step for those specific points
-4. Using the Mixture of Gaussian method (where the number of Gaussian is fixed to 3), the background and foreground are separated for the selected point of the previous step, the remaining point that were excluded are automatically associated to the background. The foreground points are then drawn to the image as red dots.
-5. If the selected foreground points are more than the defined 'threshParam' for 'numAnomalyParam' consecutive frames, the anomaly is detected and will remain active for 'numNormalParam' number of frames
+## Configure and run
+In order to run the mmAnomaly module, the C++ project needs to be built. In order to achieve this, the bash script setup.sh can be exploited. The project can be built in two ways:
+When “sudo ./setup.sh --install” is executed, the script will build the project automatically after having downloaded and installed all the required libraries;
+Executing the command “./setup.sh --build”.
 
-## Module 3
-- Define the regions of interest inside the scene (implemented as rectangles)
-- Accumulation phase: the frames between _profileFrameStartParam_ and _profilePeriodParam_ are used to build a model that defines the standard motion of the crowd
-- Evaluation phase: the computed model is used to check if inside the region of interest there is minor or major presence of people. This is shown coloring each RoI rectangle:
-	- grey: no anomaly
-	- green: standard anomaly
-	- blue/red: low/high anomaly with respect to the computed particle energy
+When the build is finished, an executable file “mmAnomalyExecutable” is generated. It can be run making explicit the module number that has to be executed (e.g., “./mmAnomalyExecutable 2” to run the second module). A flag “-v” or “--verbose” can be passed as the last parameter if more statistics are needed in the console output. Note that the configuration files inside the config folder need to be adapted before running the executable.
+
+## Theory
+To understand how the two modules work is suggested to take a look to the report present in the repository.
