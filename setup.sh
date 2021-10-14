@@ -18,6 +18,11 @@ function install {
 
     actual_dir=$(pwd)
 
+    # Update repositories
+    echo "--- Updating local repositories ---"
+    apt update -y >/dev/null 2>&1
+    apt upgrade -y >/dev/null 2>&1
+
     echo "--- Install dependecies for build ---"
     apt install build-essential g++ cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
